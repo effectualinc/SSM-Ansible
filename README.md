@@ -95,7 +95,7 @@ SSM         | Install and Enable
 ## Supported Systems
 
 Operating System  | IDNotes | Status
----------------- | --- | ------- | ------
+---------------- | --- | ------- | 
 AWS Linux 2  | Amazon 2 | Full Support
 
 
