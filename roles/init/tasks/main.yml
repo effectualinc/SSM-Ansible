@@ -1,0 +1,9 @@
+---
+
+- name: Create Installer Directory
+  file:
+    path: /chsinit/
+    state: directory
+    owner: root
+    mode: 0755
+

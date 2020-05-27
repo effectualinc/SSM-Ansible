@@ -1,0 +1,35 @@
+---
+- name: Check if EPEL is already configured
+  stat:
+    path: "/etc/yum.repos.d/epel.repo"
+  register: epel_repo
+  changed_when: false
+
+- name: Install EPEL repo (RedHat)
+  yum:
+    name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+    state: present
+  when: not epel_repo.stat.exists and ansible_distribution in ["RedHat"]
+
+- name: Install EPEL repo (CentOS)
+  yum:
+    name: epel-release
+    state: present
+  when: not epel_repo.stat.exists and ansible_distribution in ["CentOS"]
+
+  # workaround until ansible can differ between aws linux releases
+- name: Check if Amazon Linux 2
+  command: if grep -q "Amazon Linux.* 2 " /etc/system-release; then echo true; else echo false; fi;
+  register: aws_linux_2
+  changed_when: false
+  when: not epel_repo.stat.exists and ansible_distribution in ["Amazon"]
+
+- name: Install EPEL repo (Amazon)
+  command: "yum-config-manager --enable epel"
+  when: not epel_repo.stat.exists and ansible_distribution in ["Amazon"] and aws_linux_2.stdout == "false"
+
+- name: Install EPEL repo (Amazon 2)
+  yum:
+    name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+    state: present
+  when: not epel_repo.stat.exists and ansible_distribution in ["Amazon"] and aws_linux_2.stdout == "true"

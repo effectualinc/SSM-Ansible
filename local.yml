@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  connection: local
+  become: yes
+  become_method: sudo
+  gather_facts: true
+
+  roles:
+    - banner
+    - basic-services
+    - pip
+    - awscli
+    - awslogs
+    - logrotate
+    - postfix
+    - clamAV
+    - ssh
+    - ssm

@@ -1,0 +1,12 @@
+---
+  - name: restart awslogs
+    service: name=awslogs state=restarted
+    listen: restart awslogs
+    ignore_errors: yes
+    when: not (ansible_distribution == "Amazon" and ansible_distribution_version == "2")
+
+  - name: restart awslogs (AWS Linux 2)
+    service: name=awslogsd state=restarted
+    listen: restart awslogs
+    ignore_errors: yes
+    when: ansible_distribution == "Amazon"

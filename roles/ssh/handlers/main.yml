@@ -1,0 +1,12 @@
+---
+  - name: restart sshd (RedHat/CentOS/Amazon)
+    service: name=sshd  state=restarted
+    listen: restart sshd
+    ignore_errors: true
+    when: ansible_distribution in ["RedHat", "CentOS", "Amazon"]
+
+  - name: restart sshd (Ubuntu)
+    service: name=ssh  state=restarted
+    listen: restart sshd
+    ignore_errors: true
+    when: ansible_distribution in ["Ubuntu"]

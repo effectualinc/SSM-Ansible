@@ -1,0 +1,23 @@
+#============================================================================#
+                        WARNING TO USERS OF THIS SYSTEM
+
+This computer system, including all related equipment, networks, and network
+devices (including Internet access), is provided by the Department of the
+Interior (DOI) in accordance with the agency policy for official use and
+limited personal use.
+All agency computer systems may be monitored for all lawful purposes,
+including but not limited to, ensuring that use is authorized, for management
+of the system, to facilitate protection against unauthorized access, and to
+verify security procedures, survivability and operational security. Any
+information on this computer system may be examined, recorded, copied and
+used for authorized purposes at any time.
+All information, including personal information, placed or sent over this
+system may be monitored, and users of this system are reminded that such
+monitoring does occur. Therefore, there should be no expectation of privacy
+with respect to use of this system.
+By logging into this agency computer system, you acknowledge and consent to
+the monitoring of this system. Evidence of your use, authorized or
+unauthorized, collected during monitoring may be used for civil, criminal,
+administrative, or other adverse action. Unauthorized or illegal use may
+subject you to prosecution.
+#============================================================================#

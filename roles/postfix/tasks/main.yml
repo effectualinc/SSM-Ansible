@@ -1,0 +1,26 @@
+---
+- name: Uninstall sendmail
+  package:
+    name: sendmail
+    state: absent
+
+- name: Install postfix
+  package:
+    name: postfix
+    state: latest
+
+- name: Check if postfix main.cf exists
+  stat:
+    path: /etc/postfix/main.cf
+  register: postfix_status
+
+# - name: Configure postfix smtp
+#   lineinfile:
+#     path: /etc/postfix/main.cf
+#     regexp: "{{ item.regexp }}"
+#     state: "{{ item.state }}"
+#     line: "relayhost = "
+#   with_items:
+#     - {regexp: "relayhost =(?! )", state: absent}
+#     - {regexp: "relayhost = ", state: present}
+#   notify: restart postfix

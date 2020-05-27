@@ -1,0 +1,62 @@
+---
+# tasks file for aws-ssm
+# from https://github.com/dhoeric/ansible-aws-ssm
+- name: Get CPU architecture
+  command: getconf LONG_BIT
+  register: cpu_arch
+  changed_when: False
+  check_mode: no
+
+- name: Change URL destination for 32bit arch
+  set_fact:
+    url: '386'
+  when: cpu_arch.stdout == '32'
+
+- name: Install rpm file for Redhat Family (Amazon Linux, RHEL, and CentOS) 32/64-bit
+  yum:
+    name: "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_{{ url }}/amazon-ssm-agent.rpm"
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Install deb file for Debian family 32/64-bit
+  apt:
+    deb: "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_{{ url }}/amazon-ssm-agent.deb"
+  when: ansible_os_family == 'Debian' and ansible_distribution_major_version in ["14"]
+
+- name: Start ssm service (Ubuntu 14)
+  service:
+    name: amazon-ssm-agent
+    enabled: yes
+    state: started
+  when: ansible_os_family == 'RedHat' or (ansible_os_family == 'Debian' and ansible_distribution_major_version in ["14"])
+
+- name: Check ssm installed (Ubuntu 16/18)
+  command: snap services amazon-ssm-agent
+  register: snap_install_status
+  ignore_errors: true
+  changed_when: false
+  when: ansible_os_family == 'Debian' and ansible_distribution_major_version in ["16", "17", "18"]
+
+- name: Install ssm (Ubuntu 16/18)
+  command: snap install amazon-ssm-agent --classic
+  when: ansible_os_family == 'Debian' and ansible_distribution_major_version in ["16", "17", "18"] and snap_install_status.stdout == ""
+
+- name: Check ssm enabled (Ubuntu 16/18)
+  shell: if snap services amazon-ssm-agent | grep -q enabled; then echo true; else echo false; fi;
+  register: ssm_enabled
+  changed_when: false
+  when: ansible_os_family == 'Debian' and ansible_distribution_major_version in ["16", "17", "18"]
+
+- name: Enable ssm service (Ubuntu 16/18)
+  command: snap enable amazon-ssm-agent
+  when: ansible_os_family == 'Debian' and ansible_distribution_major_version in ["16", "17", "18"] and ssm_enabled.stdout == "false"
+
+- name: Check ssm started (Ubuntu 16/18)
+  shell: "if snap services amazon-ssm-agent | grep -q inactive; then echo  true; else echo false; fi;"
+  register: ssm_inactive
+  changed_when: false
+  when: ansible_os_family == 'Debian' and ansible_distribution_major_version in ["16", "17", "18"]
+
+- name: Start ssm service (Ubuntu 16/18)
+  command: snap start amazon-ssm-agent
+  when: ansible_os_family == 'Debian' and ansible_distribution_major_version in ["16", "17", "18"] and ssm_inactive.stdout == "true"

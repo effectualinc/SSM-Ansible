@@ -1,0 +1,26 @@
+---
+- name: Comment Daily Rotation
+  lineinfile:
+    dest: /etc/logrotate.conf
+    regexp: 'rotate log files.*'
+    line: '# rotate log files daily'
+    backrefs: yes
+  tags:
+  - AU-9
+
+- name: Ensure Logrotate Runs Periodically
+  lineinfile:
+    dest: /etc/logrotate.conf
+    regexp: "weekly"
+    line: "daily"
+    backrefs: yes
+  tags:
+  - AU-9
+
+- name: Create logrotate entry for ansible-pull.log
+  template:
+    src: templates/etc_logrotate.d_ansible-pull.j2
+    dest: /etc/logrotate.d/ansible-pull
+    owner: root
+    group: root
+    mode: 0644

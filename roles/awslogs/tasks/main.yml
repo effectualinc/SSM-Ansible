@@ -1,0 +1,74 @@
+---
+- name: Check if AWSLogs Service Exists
+  stat:
+    path: /etc/init.d/awslogs
+  register: awslogs_status
+
+- name: Install AWSLogs AWS Linux
+  yum:
+    name: awslogs
+    state: latest
+  when: ansible_distribution in ['Amazon']
+
+- name: Format beginning of AWSLogs config file
+  replace:
+    dest: /etc/awslogs/awscli.conf
+    regexp: "us-west-2|region = .*"
+    before: "\\[default\\]"
+  notify: restart awslogs
+  when: ansible_distribution in ['Amazon']
+
+- name: Format and set AWSLogs config file region
+  lineinfile:
+    dest: /etc/awslogs/awscli.conf
+    regexp: "{{ item.regexp }}"
+    state: "{{ item.state }}"
+    insertafter: "{{ item.after }}"
+    line: "{{ item.line }}"
+  with_items:
+    - {regexp: "region =(?! us-west-2.*)", state: absent, after: "", line: ""}
+    - {regexp: "(?<!region = )us-west-2", state: absent, after: "", line: ""}
+    - {regexp: "region = us-west-2.*", state: present, after: ".default.*", line: "region = us-west-2"}
+  notify: restart awslogs
+  when: ansible_distribution in ['Amazon']
+
+- name: Move awslogs.cfg file
+  copy:
+    src: awslogs.cfg
+    dest: /chsinit/
+    owner: root
+    mode: 0555
+
+- name: Download AWSLogs install-agent
+  get_url:
+    url: https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
+    dest: /chsinit/
+    mode: 0700
+  when: not awslogs_status.stat.exists and ansible_distribution in ["RedHat", "CentOS", "Ubuntu"]
+
+- name: Download and extract AWSLogs setup dependencies (RedHat6/CentOS6)
+  unarchive:
+    src: https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/AgentDependencies.tar.gz
+    dest: /chsinit/
+    remote_src: yes
+  when: not awslogs_status.stat.exists and ansible_python_version < "2.7" and ansible_distribution in ["RedHat", "CentOS"]
+
+- name: Install AWSLogs.py
+  shell: "python /chsinit/awslogs-agent-setup.py -n -r us-west-2 -c /chsinit/awslogs.cfg"
+  ignore_errors: true
+  when: not awslogs_status.stat.exists and ansible_python_version > "2.7" and ansible_distribution in ["RedHat", "CentOS", "Ubuntu"]
+
+- name: Install AWSLogs.py (RedHat6/CentOS6)
+  shell: "python /chsinit/awslogs-agent-setup.py -n -r us-west-2 -c /chsinit/awslogs.cfg --dependency-path /chsinit/AgentDependencies"
+  ignore_errors: true
+  when: not awslogs_status.stat.exists and ansible_python_version < "2.7" and ansible_distribution in ["RedHat", "CentOS"]
+
+- name: Ensure AWSLogs is running
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  ignore_errors: true
+  with_items:
+    - awslogs
+    - awslogsd

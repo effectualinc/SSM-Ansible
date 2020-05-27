@@ -1,0 +1,11 @@
+---
+## Requires that pip.yaml processed
+- name: 'Install AWS CLI'
+  pip:
+    name: awscli
+    state: latest
+
+- name: "boto3"
+  pip:
+    name: boto3
+    state: latest

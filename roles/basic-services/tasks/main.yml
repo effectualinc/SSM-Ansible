@@ -1,0 +1,220 @@
+---
+## Remove services
+- name: Disable xinetd Service
+  service:
+    name: xinetd
+    enabled: false
+    state: stopped
+  ignore_errors: yes
+  tags:
+    - CM
+    - CM-7
+
+- name: Uninstall xinted Package
+  package:
+    name: xinetd
+    state: absent
+  tags:
+    - CM
+    - CM-7
+
+- name: Disable telnet Service
+  service:
+    name: telnet
+    enabled: false
+    state: stopped
+  ignore_errors: yes
+  tags:
+    - CM
+    - CM-7
+
+- name: Uninstall telnet Package
+  package:
+    name: telnet
+    state: absent
+  tags:
+    - CM
+    - CM-7
+
+- name: Disable rexec Service
+  service:
+    name: rexec
+    enabled: false
+    state: stopped
+  ignore_errors: yes
+  tags:
+    - CM
+    - CM-7
+
+- name: Disable rsh Service
+  service:
+    name: rsh
+    enabled: false
+    state: stopped
+  ignore_errors: yes
+  tags:
+    - CM
+    - CM-7
+
+- name: Disable rlogin Service
+  service:
+    name: rlogin
+    enabled: false
+    state: stopped
+  ignore_errors: yes
+  tags:
+    - CM
+    - CM-7
+
+- name: Uninstall rsh-server Package
+  package:
+    name: rsh-server
+    state: absent
+  tags:
+    - CM
+    - CM-7
+
+- name: Remove Rsh Trust Files - /etc/hosts.equiv
+  file:
+    dest: /etc/hosts.equiv
+    state: absent
+  tags:
+    - conf-low
+    - conf-medium
+    - conf-high
+    - int-low
+    - int-medium
+    - int-high
+    - CM
+    - CM-7
+
+- name: Find User Rsh Trust Files
+  shell: "find /home -name '.rhosts' -print"
+  register: user_rhosts
+  check_mode: no
+  changed_when: False
+  tags:
+    - CM
+    - CM-7
+
+- name: Remove Rsh Trust Files - ~/.rhosts
+  with_items: "{{ user_rhosts.stdout_lines }}"
+  file:
+    dest: "{{ item }}"
+    state: absent
+  tags:
+    - conf-low
+    - conf-medium
+    - conf-high
+    - int-low
+    - int-medium
+    - int-high
+    - CM
+    - CM-7
+
+- name: Disable ypbind Service
+  service:
+    name: ypbind
+    enabled: false
+    state: stopped
+  ignore_errors: yes
+  tags:
+    - CM
+    - CM-7
+
+- name: Uninstall ypserv Package
+  package:
+    name: ypserv
+    state: absent
+  tags:
+    - CM
+    - CM-7
+
+- name: Disable tftp Service
+  service:
+    name: tftp
+    enabled: false
+    state: stopped
+  ignore_errors: yes
+  tags:
+    - CM
+    - CM-7
+
+- name: Uninstall tftp-server Package
+  package:
+    name: tftp-server
+    state: absent
+  tags:
+    - CM
+    - CM-7
+
+- name: Disable avahi Service
+  service:
+    name: avahi-daemon
+    enabled: false
+    state: stopped
+  ignore_errors: yes
+  tags:
+    - CM
+    - CM-7
+
+- name: Disable ntpdate Service (ntpdate)
+  service:
+    name: ntpdate
+    state: stopped
+    enabled: false
+  ignore_errors: true
+  tags:
+  - CM
+  - CM-7
+
+- name: Disable Network Router Discovery Daemon (rdisc)
+  service:
+    name: rdisc
+    state: stopped
+    enabled: false
+  ignore_errors: true
+  tags:
+  - CM
+  - CM-7
+
+- name: Disable Network Console (netconsole)
+  service:
+    name: netconsole
+    state: stopped
+    enabled: false
+  ignore_errors: true
+  tags:
+  - CM
+  - CM-7
+
+## Make Services Run
+- name: Ensure rsyslog is running
+  service:
+    name: rsyslog
+    state: started
+    enabled: yes
+  tags:
+  - AU
+  - AU-12
+
+- name: Enable cron Service (Ubuntu/Debian)
+  service:
+    name: cron
+    state: started
+    enabled: true
+  when: ansible_distribution in ["Ubuntu", "Debian"]
+  tags:
+  - CM
+  - CM-7
+
+- name: Enable cron Service (RedHat/CentOS/Amazon)
+  service:
+    name: crond
+    state: started
+    enabled: true
+  when: ansible_distribution in ["RedHat", "CentOS", "Amazon"]
+  tags:
+  - CM
+  - CM-7
+

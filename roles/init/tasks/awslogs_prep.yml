@@ -1,0 +1,7 @@
+---
+- name: Add /etc/redhat-release file workaround
+  copy:
+    src: /etc/issue
+    dest: /etc/redhat-release
+    force: no
+  when: ansible_distribution == "Ubuntu"
