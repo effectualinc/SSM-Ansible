@@ -6,13 +6,12 @@
   gather_facts: true
 
   roles:
-    - banner
+    #- banner
     - basic-services
-    - pip
-    - awscli
-    - awslogs
+    #- pip
+    #- awscli
+    #- awslogs
     - logrotate
-    - postfix
-    - clamAV
+    #- postfix
     - ssh
-    - ssm
+    #- ssm
